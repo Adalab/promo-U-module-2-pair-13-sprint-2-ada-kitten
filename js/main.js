@@ -92,31 +92,44 @@ function handleClickNewCatForm(event) {
 //Adicionar nuevo gatito
 function addNewKitten(event) {
   event.preventDefault();
-  const valuePhoto = inputPhoto.value;
-  const valueName = inputName.value;
-  const valueDesc = inputDesc.value;
-  const valueRace = inputRace.value;
-  if (valueDesc === "" || valuePhoto === "" || valueName === "") {
+  const newImage = inputPhoto.value;
+  const newDescription = inputDesc.value;
+  const newName = inputName.value;
+  const newRace = inputRace.value;
+  if (newDescription === "" || newImage === "" || newName === "") {
     labelMessageError.innerHTML = "¡Uy! parece que has olvidado algo";
-  } else if (valueDesc !== "" && valuePhoto !== "" && valueName !== "") {
+  } else if (newDescription !== "" && newImage !== "" && newName !== "") {
     labelMessageError.innerHTML = "";
 
     const newKittenDataObject = {
-      image: valuePhoto,
-      name: valueName,
-      desc: valueDesc,
-      race: valueRace,
+      image: newImage,
+      name: newName,
+      desc: newDescription,
+      race: newRace,
     };
-    renderKitten(newKittenDataObject);
-    kittenDataList.push(newKittenDataObject);
-    renderKittenList(kittenDataList);
 
-    //Vaciar inputs al añadir gatito
-    inputDesc.value = "";
-    inputPhoto.value = "";
-    inputName.value = "";
-    inputRace.value = "";
-    labelMessageError.innerHTML = "Mola! Un nuevo gatito en Adalab!";
+    fetch(`https://dev.adalab.es/api/kittens/${GITHUB_USER}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newKittenDataObject),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        if (data.success) {
+          renderKitten(newKittenDataObject);
+          kittenDataList.push(newKittenDataObject);
+          localStorage.setItem("kittensList", JSON.stringify(kittenDataList));
+          renderKittenList(kittenDataList);
+          inputDesc.value = "";
+          inputPhoto.value = "";
+          inputName.value = "";
+          inputRace.value = "";
+          labelMessageError.innerHTML = "Mola! Un nuevo gatito en Adalab!";
+        } else {
+          labelMessageError.innerHTML = "404 gatito not found";
+        }
+      });
   }
 }
 
